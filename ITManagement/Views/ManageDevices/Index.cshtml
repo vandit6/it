@@ -1,0 +1,492 @@
+﻿<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+@model ITManagement.Models.Devices
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<style>
+    /* Custom styles */
+    .btn-icon {
+        font-size: 1.5rem;
+        margin: 4px;
+    }
+
+    .btn {
+        margin: 5px;
+        font-size: 1.3rem;
+    }
+
+    .head {
+        font-size: 2.5rem;
+        font-weight: 600;
+        text-align: center;
+        margin: 20px;
+    }
+
+    .info {
+        font-size: 1.5rem;
+    }
+
+    .data {
+        font-size: 1.3rem;
+    }
+
+    #addbutton {
+        background-color: #00BFFF;
+        border-radius: 5px;
+        padding: 8px 20px;
+        margin-bottom: 15px;
+        color: white;
+        border: none;
+        box-shadow: 2px 2px 2px 2px #E8E8E8;
+    }
+
+    #Edit {
+        background-color: #5cb85c;
+        border: none;
+        margin-right: 5px;
+        padding: 8px 15px;
+        border-radius: 3px;
+        color: white;
+    }
+
+        #Edit a {
+            text-decoration: none;
+        }
+
+    #Delete {
+        background-color: #d9534f;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 3px;
+        color: white;
+    }
+
+    thead {
+        color: black;
+        background-color: green !important;
+        font-size:1.7rem;
+    }
+
+    tr:nth-child(even) td {
+        background-color: #E8E8E8;
+    }
+
+    tr:nth-child(odd) td {
+        background-color: white;
+    }
+    .head {
+        font-size: 4.5rem;
+        font-weight: 600;
+    }
+    .data {
+        font-size: 1.7rem;
+    }
+</style>
+
+<h1 class=" head text-center">Manage Devices</h1>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <button id="addbutton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                <i class="fa fa-plus btn-icon"></i> Add Device
+            </button>
+            <button id="updateAll" type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateall">
+                Update All
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr class="info">
+                        <th>Device Name</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>User Code</th>
+                        <th>Alloted To</th>
+                        <th>Alloted Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in ViewBag.Device)
+                    {
+                    <tr>
+                        <td class="data">@item.DeviceName</td>
+                        <td class="data">@item.Category.CategoryName</td>
+                        <td class="data">@item.Description</td>
+                        <td class="data">
+                            @if (item.Status)
+                            {
+                                <p>Alloted</p>
+                            }
+                            else
+                            {
+                                <p>Not Alloted</p>
+                            }
+                        </td>
+                        <td class="data">
+                            @if (item.User != null)
+                            {
+                                @item.User.UserId
+                            }
+                            else
+                            {
+                                <text></text>
+                            }
+                        </td>
+                        <td class="data">
+                            @if (item.User != null)
+                            {
+                                @item.User.FullName
+                            }
+                            else
+                            {
+                                <text></text>
+                            }
+                        </td>
+                        <td class="data">@item.AllotedDate</td>
+                        <td>
+                            <button id="Edit" type="button" class="btn btn-success" onclick="openEditModal('@item.DeviceId', '@item.DeviceName', '@item.CategoryId', '@item.Description', '@item.Status', '@item.UserId')">
+                                Edit
+                                &nbsp;
+                                &nbsp;
+                                <i class="fa fa-pencil btn-icon"></i>
+                            </button>
+                            <form method="post" asp-action="DeleteDevice" id="deleteCategory" style="display:inline;">
+                                <input type="hidden" asp-for="DeviceId" name="deleteDeviceId" id="deleteDeviceId" value="@item.DeviceId" />
+                                <button type="submit" id="Delete">
+                                    Delete
+                                    <i class="fa fa-trash btn-icon"></i>
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="selectedDeviceIds" value="@item.DeviceId" />
+                            @*<script>
+                alert(@item.DeviceId);
+            </script>*@
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Modal for create -->
+<form method="post" asp-controller="ManageDevices" asp-action="Create" class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h2 class="modal-title" id="exampleModalLabel">Add Device</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label asp-for="DeviceName" class="control-label"></label>
+                    <input asp-for="DeviceName" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label asp-for="CategoryId" class="control-label"></label>
+                    <select asp-for="CategoryId" asp-items="ViewBag.CategoryId" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description" class "control-label"></label>
+                    <input asp-for="Description" class="form-control" required/>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox">
+                        <label>
+                            <input asp-for="Status" id="statusCheckbox" /> Status
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="UserId" class="control-label"></label>
+                        <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId" id="userIdSelect" required>
+                            <option value="" disabled selected>Select a user</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer form-group">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background-color:#BB3F3F; color:white">Close</button>
+                <button type="submit" class="btn btn-primary" value="Create">Add</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="editCategoryModal" tabindex="-1" role="dialog" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryModalLabel">Edit Device Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+<div class="modal-body">
+                <form id="editCategoryForm" method="post" asp-action="Edit">
+                    <div class="form-group">
+                        <label asp-for="DeviceName" class="control-label"></label>
+                        <input type="text" asp-for="DeviceName" class="form-control" id="editdeviceName" name="DeviceName" required />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="CategoryId" class="control-label"></label>
+                        <select asp-for="CategoryId" asp-items="ViewBag.CategoryId" class="form-control" id="editcId" required></select>
+                    </div>
+                    <input type="hidden" id="DIdd" name="DeviceId" asp-for="DeviceId" class="form-control" />
+                    <label asp-for="Description" class="control-label"></label>
+                    <input type="text" asp-for="Description" class="form-control" id="editdesc" name="Description" required/>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input asp-for="Status" id="est" /> Status
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="UserId" class="control-label"></label>
+                        <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId" id="editUId" required></select>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background-color:#BB3F3F; color:white">Close</button>
+                <input type="submit" value="Save Changes" class="btn btn-primary" />
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditModal(Did, DName, CId, Desc, St, Uid) {
+        document.getElementById('DIdd').value = Did;
+        document.getElementById('editdeviceName').value = DName;
+        document.getElementById('editcId').value = CId;
+        document.getElementById('editdesc').value = Desc;
+
+        const userIdField = document.getElementById('editUId');
+
+        if (St === 'True') {
+            document.getElementById('est').checked = true;
+            userIdField.disabled = false; // Enable userid field
+        } else {
+            document.getElementById('est').checked = false;
+            userIdField.disabled = true; // Disable userid field
+        }
+
+        userIdField.value = Uid;
+
+        document.getElementById('est').addEventListener('change', function () {
+            if (this.checked) {
+                userIdField.disabled = false; // Enable userid field
+            } else {
+                userIdField.disabled = true; // Disable userid field
+            }
+        });
+
+        $('#editCategoryModal').modal('show');
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var statusCheckbox = document.getElementById('statusCheckbox');
+        var userIdSelect = document.getElementById('userIdSelect');
+
+        statusCheckbox.addEventListener('change', function () {
+            userIdSelect.disabled = !statusCheckbox.checked;
+        });
+
+        // Set initial state
+        userIdSelect.disabled = !statusCheckbox.checked;
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var statusCheckbox = document.getElementById('updateStatus');
+        var userIdSelect = document.getElementById('updateUId');
+        var CatCheckbox = document.getElementById('CatCheckbox');
+        var upcat = document.getElementById('upcat');
+        var allotment = document.getElementById('allotment');
+        statusCheckbox.addEventListener('change', function () {
+            userIdSelect.disabled = !statusCheckbox.checked;
+        });
+        CatCheckbox.addEventListener('change', function () {
+            upcat.disabled = !CatCheckbox.checked;
+
+        });
+        allotment.addEventListener('change', function () {
+            statusCheckbox.disabled = !allotment.checked;
+        });
+
+
+        // Set initial state
+        statusCheckbox.disabled = !allotment.checked;
+        upcat.disabled = !CatCheckbox.checked;
+
+        userIdSelect.disabled = !statusCheckbox.checked;
+    });
+</script>
+
+<div class="modal fade" id="updateall" tabindex="-1" role="dialog" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryModalLabel">Edit User Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <form id="editCategoryForm" method="post" asp-action="UpdateAllDevices">
+
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" id="CatCheckbox" /> Update Category
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="CategoryId" class="control-label">Category</label>
+                        <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId" id="upcat" required></select>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" id="allotment" /> allotment
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" asp-for="Status" id="updateStatus" /> Status
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="UserId" class="control-label"></label>
+                        <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId" id="updateUId" required></select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background-color:#BB3F3F; color:white">Close</button>
+                        <input type="submit" value="Save Changes" class="btn btn-primary" id="save" />
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    function openEditModal(Did, DName, CId, Desc, St, Uid) {
+        document.getElementById('DIdd').value = Did;
+        document.getElementById('editdeviceName').value = DName;
+        document.getElementById('editcId').value = CId;
+        document.getElementById('editdesc').value = Desc;
+
+        const userIdField = document.getElementById('editUId');
+
+        // Check the value of the 'Status' field
+        if (St === 'True') {
+            document.getElementById('est').checked = true;
+            userIdField.disabled = false; // Enable userid field
+        } else {
+            document.getElementById('est').checked = false;
+            userIdField.disabled = true; // Disable userid field
+        }
+
+        userIdField.value = Uid;
+
+        // Add an event listener for the change event of 'St' field
+        document.getElementById('est').addEventListener('change', function () {
+            if (this.checked) {
+                userIdField.disabled = false; // Enable userid field
+            } else {
+                userIdField.disabled = true; // Disable userid field
+            }
+        });
+
+        // Open the modal
+        $('#editCategoryModal').modal('show');
+    }
+
+    document.getElementById('save').addEventListener('click', function () {
+        const checkboxes = document.querySelectorAll('input[name="selectedDeviceIds"]:checked');
+        const selectedDeviceIds = Array.from(checkboxes).map(cb => cb.value);
+        var categoryId = document.getElementById('upcat').value;
+        var status = document.getElementById('updateStatus').checked;
+        var userId = document.getElementById('updateUId').value;
+        var isUpdateCategory =document.getElementById('CatCheckbox').checked;
+        var isAllotment = document.getElementById('allotment').checked;
+
+        alert(selectedDeviceIds);
+
+        // Send the selectedDeviceIds to the controller
+        // using your preferred method (e.g., fetch or AJAX)
+        // For example, you can use the fetch API as follows:
+        $.ajax({
+            type: 'POST',
+            url: '/ManageDevices/UpdateAllDevices',
+            data: {selectedDeviceIds: selectedDeviceIds,categoryId: categoryId,status: status,userId: userId,isUpdateCategory: isUpdateCategory,isAllotment: isAllotment},
+            success: function (response) {
+                // handle the response
+                console.log('Success: ', response);
+            },
+            error: function (error) {
+                // handle any errors
+                console.error('Error: ', error);
+            }
+        });
+    });
+</script>
+
+
+@*<script>
+    $(document).ready(function () {
+        $('#editCategoryForm').submit(function (e) {
+            const checkboxes = document.querySelectorAll('input[name="selectedDeviceIds"]:checked');
+            const selectedDeviceIds = Array.from(checkboxes).map(cb => cb.value);
+            var categoryId = $('#upcat').val();
+            var status = $('#updateStatus').prop('checked');
+            var userId = $('#updateUId').val();
+            var isUpdateCategory = $('#CatCheckbox').prop('checked');
+            var isAllotment = $('#allotment').prop('checked');
+
+            var data = {
+                selectedDeviceIds: selectedDeviceIds,
+                categoryId: categoryId,
+                status: status,
+                userId: userId,
+                isUpdateCategory: isUpdateCategory,
+                isAllotment: isAllotment
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("UpdateAllDevices", "ManageDevices")', // Replace with the appropriate URL
+                data: data,
+                success: function (response) {
+                    // Handle the success response
+                    console.log('Success: ', response);
+                },
+                error: function (error) {
+                    // Handle the error response
+                    console.error('Error: ', error);
+                }
+            });
+        });
+    });
+</script>*@

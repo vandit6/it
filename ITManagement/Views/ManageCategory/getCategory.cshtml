@@ -1,0 +1,140 @@
+﻿@model ITManagement.Models.Categories
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    @{
+        ViewData["Title"] = "ManageCategoryController";
+    }
+
+    @if (TempData.ContainsKey("DisplayAlert") && (bool)TempData["DisplayAlert"])
+    {
+        <script>alert('This category exists in the Manage devices page. You need to delete it from there first.');</script>
+    }
+
+    <style>
+        /* Custom styles */
+        .btn-icon {
+            font-size: 2rem;
+            margin: 4px;
+        }
+
+        .btn {
+            margin: 5px;
+        }
+
+        .head {
+            font-size: 4.5rem;
+            font-weight: 600;
+        }
+
+        .info {
+            font-size: 2rem;
+        }
+
+        .data {
+            font-size: 1.7rem;
+        }
+    </style>
+
+    <h1 class="head text-center">Manage Categories</h1>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                    <i class="fa fa-plus btn-icon"></i> Add Category
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr class="info">
+                            <th>Category Name</th>
+                            <th style="text-align: end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ViewBag.categories)
+                        {
+                            <tr>
+                                <td class="data">@item.CategoryName</td>
+                                <td style="text-align: end">
+                                    <button class="btn btn-success btn-sm" onclick="openEditModal('@item.CategoryName', '@item.CategoryId')">
+                                        <i class="fa fa-pencil btn-icon"></i> Edit
+                                    </button>
+                                    <form method="post" asp-action="DeleteCategory" class="deleteCategory" style="display: inline; color: white">
+                                        <input type="hidden" asp-for="CategoryId" name="deleteCategoryId" id="deleteCategoryId" value="@item.CategoryId" />
+                                        <button class="btn btn-danger btn-sm">
+                                            <i class="fa fa-trash btn-icon"></i> Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if (TempData.ContainsKey("DisplayAlert") && (bool)TempData["DisplayAlert"])
+        {
+            <script>alert('This category is allotted with a device. Delete it from the device and then continue.');</script>
+        }
+    </div>
+
+    <form method="post" asp-action="CreateCategory" class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h2 class="modal-title" id="exampleModalLabel">Add Category</h2>
+
+                </div>
+                <div class="modal-body">
+                    <input asp-for="CategoryName" type="text" placeholder="Category Name" style="width:100%; padding:7px" required/ >
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background-color:#BB3F3F; color:white">Close</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        function openEditModal(categoryName, categoryId) {
+            document.getElementById('editCategoryName').value = categoryName;
+            document.getElementById('categoryId').value = categoryId;
+            $('#editCategoryModal').modal('show');
+        }
+    </script>
+
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" role="dialog" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCategoryForm" method="post" asp-action="Edit">
+                        <input type="hidden" id="categoryId" name="categoryId" asp-for="CategoryId" />
+                        <div class="form-group">
+                            <label asp-for="CategoryName" class="control-label">Category Name</label>
+                            <input type="text" asp-for="CategoryName" class="form-control" id="editCategoryName" name="CategoryName" required />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background-color: #BB3F3F; color: white">Close</button>
+                            <input type="submit" value="Save Changes" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
